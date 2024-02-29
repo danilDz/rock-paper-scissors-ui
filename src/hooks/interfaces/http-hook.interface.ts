@@ -9,6 +9,7 @@ export interface IHttpHookReturnValue {
     method?: string,
     body?: object,
     headers?: object,
-  ) => Promise<object>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ) => Promise<any>;
   clearError: () => void;
 }

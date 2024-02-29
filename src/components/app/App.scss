@@ -1,0 +1,15 @@
+@import '../../styles/variables.scss';
+
+body {
+  margin: 0;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.app {
+  width: 100vw;
+  height: 100vh;
+  background-color: $main-color;
+  color: $text-color;
+  display: flex;
+  justify-content: center;
+}

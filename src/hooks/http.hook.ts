@@ -23,17 +23,22 @@ export const useHttp = (): IHttpHookReturnValue => {
           headers,
         });
         if (!response.ok) {
-          throw new Error((response as unknown as Error).message);
+          const json = await response.json();
+          setLoading(false);
+          setError(json.message);
+          setProcess('error');
+          return json;
         }
         const data =
           returnType === 'json' ? await response.json() : await response.text();
         setLoading(false);
         return data;
-      } catch (error) {
+      } catch (err) {
+        console.log(err);
         setLoading(false);
-        setError((error as Error).message);
+        setError('Something went wrong!');
         setProcess('error');
-        return error;
+        return { statusCode: 400, message: 'Something went wrong!' };
       }
     },
     [],

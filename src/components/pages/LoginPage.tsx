@@ -1,5 +1,16 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import cookie from 'js-cookie';
+import SigninForm from '../signinForm/SigninForm';
+
 const LoginPage: React.FunctionComponent = () => {
-  return <div>Login Page</div>;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (cookie.get('jwt')) navigate('/');
+  }, []);
+
+  return <SigninForm />;
 };
 
 export default LoginPage;
