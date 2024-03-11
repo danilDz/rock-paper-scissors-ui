@@ -7,7 +7,7 @@ const Page404: React.FunctionComponent = () => {
   const jwt = cookie.get('jwt');
 
   return (
-    <div className="page404MainDiv">
+    <div className="page404Div">
       <Error />
       <p>This page doesn't exist!</p>
       <Link to={jwt ? '/' : '/login'}>

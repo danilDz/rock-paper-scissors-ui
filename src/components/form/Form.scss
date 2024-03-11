@@ -1,4 +1,5 @@
 @import '../../styles/variables.scss';
+@import '../../styles/button.scss';
 
 .formWrapper {
   width: 50%;
@@ -54,26 +55,6 @@
           margin-bottom: 20px;
         }
 
-        button {
-          margin-top: 5px;
-          margin-bottom: 15px;
-          background-color: $text-color;
-          color: $main-color;
-          border-radius: 12px;
-          border: 0;
-          box-sizing: border-box;
-          cursor: pointer;
-          font-size: 18px;
-          height: 40px;
-          text-align: center;
-          width: 100%;
-          transition: all 0.5s;
-          &:hover {
-            background-color: $main-color;
-            color: $text-color;
-          }
-        }
-
         p {
           font-size: 14px;
           margin: 0 0 10px;
@@ -82,7 +63,7 @@
           a {
             text-decoration: none;
             color: $main-color;
-            transition: all .3s;
+            transition: all 0.3s;
 
             &:hover {
               color: $text-color;

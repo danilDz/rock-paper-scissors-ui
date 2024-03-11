@@ -1,10 +1,11 @@
 import { useState, useCallback } from 'react';
 import { IHttpHookReturnValue } from './interfaces/http-hook.interface';
+import { ContentProcess } from '../utils/setContent';
 
 export const useHttp = (): IHttpHookReturnValue => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<null | string>(null);
-  const [process, setProcess] = useState<string>('loading');
+  const [process, setProcess] = useState<ContentProcess>('loading');
 
   const request = useCallback(
     async (
@@ -17,11 +18,10 @@ export const useHttp = (): IHttpHookReturnValue => {
       setLoading(true);
       setProcess('loading');
       try {
-        const response = await fetch(url, {
-          method,
-          body: JSON.stringify(body),
-          headers,
-        });
+        const options = { method, headers };
+        if (method !== 'GET')
+          Object.assign(options, { body: JSON.stringify(body) });
+        const response = await fetch(url, options);
         if (!response.ok) {
           const json = await response.json();
           setLoading(false);

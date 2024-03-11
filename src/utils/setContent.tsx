@@ -1,8 +1,10 @@
 import { Error as ErrorComponent } from '../components/error/Error';
 import { Spinner } from '../components/spinner/Spinner';
 
+export type ContentProcess = 'loading' | 'confirmed' | 'error';
+
 const setContent = (
-  process: string,
+  process: ContentProcess,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Component: React.FunctionComponent<any>,
   data: object,

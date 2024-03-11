@@ -51,6 +51,65 @@ const useApiService = () => {
     );
   };
 
+  const checkUser = async () => {
+    return await request(
+      `${baseUrl}/api/auth/check`,
+      'json',
+      'GET',
+      undefined,
+      {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${cookie.get('jwt')}`,
+      },
+    );
+  };
+
+  const getAllUsers = async () => {
+    return await request(
+      `${baseUrl}/api/auth/get/users`,
+      'json',
+      'GET',
+      undefined,
+      {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${cookie.get('jwt')}`,
+      },
+    );
+  };
+
+  const getGame = async () => {
+    return await request(`${baseUrl}/api/game/get`, 'json', 'GET', undefined, {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${cookie.get('jwt')}`,
+    });
+  };
+
+  const createGame = async (firstPlayerId: string, secondPlayerId: string) => {
+    return await request(
+      `${baseUrl}/api/game/create`,
+      'json',
+      'POST',
+      { firstPlayerId, secondPlayerId },
+      {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${cookie.get('jwt')}`,
+      },
+    );
+  };
+
+  const makeChoice = async (gameId: string, field: string, value: string) => {
+    return await request(
+      `${baseUrl}/api/game/update/${gameId}`,
+      'json',
+      'PATCH',
+      { [field]: value },
+      {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${cookie.get('jwt')}`,
+      },
+    );
+  };
+
   return {
     loading,
     error,
@@ -60,6 +119,11 @@ const useApiService = () => {
     signup,
     signin,
     signout,
+    checkUser,
+    getAllUsers,
+    getGame,
+    createGame,
+    makeChoice,
   };
 };
 
