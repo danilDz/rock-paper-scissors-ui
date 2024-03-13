@@ -45,7 +45,6 @@ const useApiService = () => {
       'POST',
       undefined,
       {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${cookie.get('jwt')}`,
       },
     );
@@ -58,7 +57,6 @@ const useApiService = () => {
       'GET',
       undefined,
       {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${cookie.get('jwt')}`,
       },
     );
@@ -71,7 +69,6 @@ const useApiService = () => {
       'GET',
       undefined,
       {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${cookie.get('jwt')}`,
       },
     );
@@ -79,7 +76,6 @@ const useApiService = () => {
 
   const getGame = async () => {
     return await request(`${baseUrl}/api/game/get`, 'json', 'GET', undefined, {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${cookie.get('jwt')}`,
     });
   };
@@ -110,6 +106,51 @@ const useApiService = () => {
     );
   };
 
+  const determineGameResult = async () => {
+    return await request(
+      `${baseUrl}/api/game/determine-result`,
+      'json',
+      'POST',
+      undefined,
+      {
+        Authorization: `Bearer ${cookie.get('jwt')}`,
+      },
+    );
+  };
+
+  const joinGame = async (gameId: string, playerField: string) => {
+    return await request(
+      `${baseUrl}/api/game/update/${gameId}`,
+      'json',
+      'PATCH',
+      { [playerField]: true },
+      {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${cookie.get('jwt')}`,
+      },
+    );
+  };
+
+  const resetGame = async (gameId: string) => {
+    return await request(
+      `${baseUrl}/api/game/update/${gameId}`,
+      'json',
+      'PATCH',
+      {
+        firstPlayerScore: 0,
+        secondPlayerScore: 0,
+        firstPlayerChoice: 'not-selected',
+        secondPlayerChoice: 'not-selected',
+        firstPlayerJoined: false,
+        secondPlayerJoined: false,
+      },
+      {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${cookie.get('jwt')}`,
+      },
+    );
+  };
+
   return {
     loading,
     error,
@@ -124,6 +165,9 @@ const useApiService = () => {
     getGame,
     createGame,
     makeChoice,
+    determineGameResult,
+    joinGame,
+    resetGame,
   };
 };
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useApiService from '../../services/ApiService';
 import setContent from '../../utils/setContent';
 import { Game } from '../../models/game.interface';
@@ -11,10 +11,18 @@ export interface IGameFieldParameters {
 interface IViewParameters {
   gameStatus: null | string;
   game: null | Game;
+  userJoined: null | boolean;
   onCreateGameHandler: () => void;
+  onJoinGameHandler: () => void;
   onMakeChoiceHandler: (choice: string) => void;
   userLabel: null | string;
   opponentLabel: null | string;
+}
+
+interface IOpponentAndScoreDivsParameters {
+  opponent: Game['firstPlayerId'];
+  userScore: number;
+  opponentScore: number;
 }
 
 type GameStatus =
@@ -34,9 +42,12 @@ const GameField: React.FunctionComponent<IGameFieldParameters> = ({
     getGame,
     createGame,
     makeChoice,
+    determineGameResult,
+    joinGame,
   } = useApiService();
   const [gameStatus, setGameStatus] = useState<null | GameStatus>(null);
   const [game, setGame] = useState<null | Game>(null);
+  const [userJoined, setUserJoined] = useState<null | boolean>(null);
   const [opponents, setOpponents] = useState<null | string[]>(null);
   const [userLabel, setUserLabel] = useState<null | string>(null);
   const [opponentLabel, setOpponentLabel] = useState<null | string>(null);
@@ -55,12 +66,14 @@ const GameField: React.FunctionComponent<IGameFieldParameters> = ({
         return;
       }
       setOpponents(fetchedOpponents);
+
       const existedGame = await getGame();
       if (existedGame.gameNotFound) {
         setGameStatus('not-created');
         setProcess('confirmed');
         return;
       }
+
       if (existedGame.firstPlayerId.id === userId) {
         setUserLabel('first');
         setOpponentLabel('second');
@@ -68,7 +81,15 @@ const GameField: React.FunctionComponent<IGameFieldParameters> = ({
         setUserLabel('second');
         setOpponentLabel('first');
       }
+
+      if (
+        existedGame!.firstPlayerChoice !== 'not-selected' &&
+        existedGame!.secondPlayerChoice !== 'not-selected'
+      )
+        await determineGameResult();
+
       setGameStatus('created');
+      setUserJoined(existedGame[`${userLabel}PlayerJoined`]);
       setGame(existedGame);
       setProcess('confirmed');
     }
@@ -83,7 +104,22 @@ const GameField: React.FunctionComponent<IGameFieldParameters> = ({
     setGameStatus('created');
   };
 
+  const onJoinGameHandler = async () => {
+    clearError();
+    const result = await joinGame(game!.id, `${userLabel}PlayerJoined`);
+    if (result.statusCode) return;
+    setGameStatus('updated');
+  };
+
   const onMakeChoiceHandler = async (choice: string) => {
+    if (choice === 'not-selected') {
+      const game = await getGame();
+      if (game[`${opponentLabel}PlayerChoice`] !== 'not-selected') {
+        setGameStatus('updated');
+        return;
+      }
+    }
+
     clearError();
     const result = await makeChoice(
       game!.id,
@@ -99,7 +135,9 @@ const GameField: React.FunctionComponent<IGameFieldParameters> = ({
       {setContent(process, View, {
         gameStatus,
         game,
+        userJoined,
         onCreateGameHandler,
+        onJoinGameHandler,
         onMakeChoiceHandler,
         userLabel,
         opponentLabel,
@@ -111,12 +149,17 @@ const GameField: React.FunctionComponent<IGameFieldParameters> = ({
 const View: React.FunctionComponent<IViewParameters> = ({
   gameStatus,
   game,
+  userJoined,
   onCreateGameHandler,
+  onJoinGameHandler,
   onMakeChoiceHandler,
   userLabel,
   opponentLabel,
 }) => {
   const opponent = game![`${opponentLabel}PlayerId` as 'firstPlayerId'];
+  const opponentScore =
+    game![`${opponentLabel}PlayerScore` as 'firstPlayerScore'];
+  const userScore = game![`${userLabel}PlayerScore` as 'firstPlayerScore'];
   const userChoice = game![`${userLabel}PlayerChoice` as 'firstPlayerChoice'];
   switch (gameStatus) {
     case 'waiting-for-opponent':
@@ -139,16 +182,33 @@ const View: React.FunctionComponent<IViewParameters> = ({
         </>
       );
     case 'created':
+      if (!userJoined) {
+        return (
+          <>
+            <div className="gameFieldDiv">
+              <OpponentAndScoreDivs
+                opponent={opponent}
+                userScore={userScore}
+                opponentScore={opponentScore}
+              />
+              <div className="gameFieldDiv_inner controlsDiv">
+                <button className="button" onClick={onJoinGameHandler}>
+                  Start new round
+                </button>
+              </div>
+            </div>
+          </>
+        );
+      }
       if (userChoice === 'not-selected') {
         return (
           <>
             <div className="gameFieldDiv">
-              <div className="gameFieldDiv_inner opponentDiv">
-                <h3>
-                  Your opponent: <br />
-                  {opponent.username} ({opponent.status})
-                </h3>
-              </div>
+              <OpponentAndScoreDivs
+                opponent={opponent}
+                userScore={userScore}
+                opponentScore={opponentScore}
+              />
               <div className="gameFieldDiv_inner choiceField">
                 <h4>Your choices:</h4>
                 <div className="choicesDiv">
@@ -179,12 +239,11 @@ const View: React.FunctionComponent<IViewParameters> = ({
         return (
           <>
             <div className="gameFieldDiv">
-              <div className="gameFieldDiv_inner opponentDiv">
-                <h3>
-                  Your opponent: <br />
-                  {opponent.username} ({opponent.status})
-                </h3>
-              </div>
+              <OpponentAndScoreDivs
+                opponent={opponent}
+                userScore={userScore}
+                opponentScore={opponentScore}
+              />
               <div className="gameFieldDiv_inner choiceField">
                 <h4>
                   Your choice: <br />
@@ -204,6 +263,29 @@ const View: React.FunctionComponent<IViewParameters> = ({
         );
       }
   }
+};
+
+const OpponentAndScoreDivs: React.FunctionComponent<
+  IOpponentAndScoreDivsParameters
+> = ({ opponent, userScore, opponentScore }) => {
+  return (
+    <>
+      <div className="gameFieldDiv_inner opponentDiv">
+        <h3>
+          Your opponent: <br />
+          {opponent.username} ({opponent.status})
+        </h3>
+      </div>
+      <div className="gameFieldDiv_inner scoreDiv">
+        <h3>
+          Score: <br />
+          <pre>
+            You {userScore} : {opponentScore} {opponent.username}
+          </pre>
+        </h3>
+      </div>
+    </>
+  );
 };
 
 const RockSvg = () => {

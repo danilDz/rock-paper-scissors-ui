@@ -16,4 +16,6 @@ export interface Game {
     status: string;
     username: string;
   };
+  firstPlayerJoined: boolean;
+  secondPlayerJoined: boolean;
 }

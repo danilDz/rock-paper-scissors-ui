@@ -6,7 +6,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  // padding-top: 100px;
   text-align: center;
   line-height: 200%;
 
@@ -17,7 +16,7 @@
   }
 
   .opponentDiv {
-    margin-top: 100px;
+    margin-top: 50px;
   }
 
   .choiceField {
@@ -54,6 +53,13 @@
           }
         }
       }
+    }
+  }
+
+  .scoreDiv {
+    pre {
+      font-family: inherit;
+      margin: 0;
     }
   }
 

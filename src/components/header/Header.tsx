@@ -10,10 +10,12 @@ export interface IHeaderParameters {
 const Header: React.FunctionComponent<IHeaderParameters> = ({
   username,
 }: IHeaderParameters) => {
-  const { signout } = useApiService();
+  const { signout, getGame, resetGame } = useApiService();
   const navigate = useNavigate();
 
   const onLogOut = async () => {
+    const game = await getGame();
+    if (game) await resetGame(game.id);
     await signout();
     cookie.remove('jwt');
     navigate('/login');
